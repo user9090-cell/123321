@@ -2179,21 +2179,6 @@ body.dark-theme .gallery-item {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-body.dark-theme .auth-tab.active {
-    background: linear-gradient(135deg, var(--primary-color), #b23a2a);
-    color: #fff;
+body.dark-theme .message-image::after {
+    color: rgba(255, 255, 255, 0.9);
 }
-
-body.dark-theme .auth-field {
-    background: rgba(20, 45, 50, 0.5);
-}
-
-body.dark-theme .auth-field:focus-within {
-    background: rgba(20, 45, 50, 0.8);
-}
-
-body.dark-theme .auth-submit {
-    background: linear-gradient(135deg, var(--primary-color), #b23a2a);
-}
-
-
