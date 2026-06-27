@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会理市AI数字人导游 - 管理后台</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="admin-logo">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <h2>运营后台</h2>
+                        <p>Huili Smart Guide</p>
+                    </div>
+                </div>
+
+                <div class="admin-info">
+                    <div class="admin-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="admin-details">
+                        <h4>系统管理员</h4>
+                        <p>文旅导览平台</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#overview-section" class="nav-item active" data-target="overview-section">
+                    <i class="fas fa-gauge-high"></i>
+                    <span>运营概览</span>
+                </a>
+                <a href="#scenic-section" class="nav-item" data-target="scenic-section">
+                    <i class="fas fa-images"></i>
+                    <span>景区图库</span>
+                </a>
+                <a href="#knowledge-section" class="nav-item" data-target="knowledge-section">
+                    <i class="fas fa-database"></i>
+                    <span>知识库管理</span>
+                </a>
+                <a href="#feedback-section" class="nav-item" data-target="feedback-section">
+                    <i class="fas fa-comments"></i>
+                    <span>反馈与日志</span>
+                </a>
+                <a href="#settings-section" class="nav-item" data-target="settings-section">
+                    <i class="fas fa-sliders"></i>
+                    <span>系统设置</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-indicator online"></span>
+                    <span>系统在线运行</span>
+                </div>
+                <button class="btn-logout" type="button" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>返回游客端</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-left">
+                    <h1>会理市 AI 数字人导游平台</h1>
+                    <div class="breadcrumb">
+                        <span>管理后台</span>
+                        <i class="fas fa-angle-right"></i>
+                        <span>实时运营面板</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="time-display">
+                        <i class="fas fa-clock"></i>
+                        <span id="current-time">--</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="page-section active" id="overview-section">
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="card-icon primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>总请求量</p>
+                            <h3 data-stat="total_requests">--</h3>
+                            <div class="card-trend up">
+                                <i class="fas fa-arrow-trend-up"></i>
+                                <span>最近 7 天</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="card-icon success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>活跃会话</p>
+                            <h3 data-stat="active_sessions">--</h3>
+                            <div class="card-trend up">
+                                <i class="fas fa-signal"></i>
+                                <span>当前活跃</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="card-icon warning">
+                            <i class="fas fa-stopwatch"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>平均响应时间</p>
+                            <h3 data-stat="avg_response_time">--</h3>
+                            <div class="card-trend down">
+                                <i class="fas fa-wave-square"></i>
+                                <span>毫秒级响应</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="card-icon danger">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>满意度</p>
+                            <h3 data-stat="satisfaction_rate">--</h3>
+                            <div class="card-trend up">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>来自反馈统计</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4><i class="fas fa-chart-column"></i> 请求趋势</h4>
+                            <select class="chart-select">
+                                <option>最近 7 天</option>
+                                <option>最近 30 天</option>
+                            </select>
+                        </div>
+                        <div class="chart">
+                            <div class="empty-state">趋势图表区域，可接入 ECharts / Chart.js</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4><i class="fas fa-face-smile"></i> 用户反馈分布</h4>
+                            <div class="chart-legend">
+                                <span class="legend-item like"><i class="fas fa-circle"></i> 好评</span>
+                                <span class="legend-item dislike"><i class="fas fa-circle"></i> 差评</span>
+                            </div>
+                        </div>
+                        <div class="chart">
+                            <div class="empty-state">反馈图表区域，可接入可视化组件</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="realtime-section">
+                    <h3><i class="fas fa-bolt"></i> 实时状态</h3>
+                    <div class="realtime-grid">
+                        <div class="realtime-card">
+                            <div class="realtime-title"><i class="fas fa-server"></i> API 状态</div>
+                            <div class="realtime-value" id="api-status">--</div>
+                        </div>
+                        <div class="realtime-card">
+                            <div class="realtime-title"><i class="fas fa-database"></i> 数据库状态</div>
+                            <div class="realtime-value" id="db-status">--</div>
+                        </div>
+                        <div class="realtime-card">
+                            <div class="realtime-title"><i class="fas fa-memory"></i> 缓存信息</div>
+                            <div class="realtime-value" id="memory-usage">--</div>
+                        </div>
+                        <div class="realtime-card">
+                            <div class="realtime-title"><i class="fas fa-code-branch"></i> 应用版本</div>
+                            <div class="realtime-value" id="app-version">--</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section" id="scenic-section">
+                <div class="management-grid">
+                    <div class="action-card">
+                        <h3><i class="fas fa-plus-circle"></i> 添加景区图片</h3>
+                        <p>上传本地图片或添加图片链接，供游客在图库中搜索查看。</p>
+                        <form id="add-scenic-form" enctype="multipart/form-data">
+                            <div class="form-group" style="margin-bottom:14px">
+                                <label style="font-weight:600;display:block;margin-bottom:4px">景区名称 *</label>
+                                <input type="text" id="scenic-place-name" placeholder="如：会理古城、龙肘山" style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:12px;font-size:0.95rem">
+                            </div>
+                            <div class="form-group" style="margin-bottom:14px">
+                                <label style="font-weight:600;display:block;margin-bottom:4px">图片描述</label>
+                                <input type="text" id="scenic-description" placeholder="简要描述图片内容" style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:12px;font-size:0.95rem">
+                            </div>
+                            <div class="form-group" style="margin-bottom:14px">
+                                <label style="font-weight:600;display:block;margin-bottom:4px">上传图片</label>
+                                <input type="file" id="scenic-file" accept="image/jpeg,image/png,image/gif,image/webp" style="width:100%;padding:8px;border:1px dashed var(--border-color);border-radius:12px">
+                            </div>
+                            <div class="form-group" style="margin-bottom:14px">
+                                <label style="font-weight:600;display:block;margin-bottom:4px">或输入图片链接</label>
+                                <input type="text" id="scenic-image-url" placeholder="https://example.com/image.jpg" style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:12px;font-size:0.95rem">
+                            </div>
+                            <p id="add-scenic-error" style="color:var(--danger-color);font-size:0.85rem;min-height:1.2em"></p>
+                            <button type="submit" class="btn-primary" style="width:100%"><i class="fas fa-plus"></i> 添加图片</button>
+                        </form>
+                    </div>
+
+                    <div class="knowledge-status-card">
+                        <h3><i class="fas fa-info-circle"></i> 图库说明</h3>
+                        <p>管理员上传的图片将优先展示给游客。当游客搜索景区时，系统会：</p>
+                        <ul style="padding-left:1.2rem;margin-top:8px;color:var(--text-light);font-size:0.9rem">
+                            <li>优先展示管理员上传的本地图片</li>
+                            <li>如无本地图片，自动从 Bing 搜索相关景区图片</li>
+                            <li>本地图片和搜索结果可同时展示</li>
+                        </ul>
+                        <div class="info-grid" style="margin-top:16px">
+                            <div class="info-item">
+                                <span class="info-label">本地图库数量</span>
+                                <span class="info-value" id="local-image-count">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                        <h3 style="margin:0"><i class="fas fa-images"></i> 景区图片列表</h3>
+                        <div style="display:flex;gap:8px">
+                            <input type="text" id="scenic-search-keyword" placeholder="搜索景区名称..." style="padding:8px 14px;border:1px solid var(--border-color);border-radius:999px;font-size:0.85rem;width:200px">
+                            <button id="scenic-search-btn" class="btn-small"><i class="fas fa-search"></i> 搜索</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>预览</th>
+                                    <th>景区名称</th>
+                                    <th>描述</th>
+                                    <th>来源</th>
+                                    <th>添加时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scenic-images-tbody">
+                                <tr><td colspan="6">加载中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section" id="knowledge-section">
+                <div class="management-grid">
+                    <div class="knowledge-status-card">
+                        <h3><i class="fas fa-book-open"></i> 知识库状态</h3>
+                        <p>当前知识库用于景点问答、附近景点推荐、知识检索和上下文增强回答。</p>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">知识库状态</span>
+                                <span class="info-value" id="knowledge-status-text">运行中</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">缓存 TTL</span>
+                                <span class="info-value" id="cache-ttl-display">3600 秒</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-card">
+                        <h3><i class="fas fa-gears"></i> 运维操作</h3>
+                        <p>上传文档后可重建知识库，重新生成向量索引和缓存策略。</p>
+                        <div class="actions-grid">
+                            <button class="btn-primary" type="button" data-open-modal="upload-modal">
+                                <i class="fas fa-upload"></i>
+                                <span>上传文档</span>
+                            </button>
+                            <button class="btn-warning" type="button" data-open-modal="rebuild-modal">
+                                <i class="fas fa-rotate"></i>
+                                <span>重建知识库</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <h3><i class="fas fa-file-lines"></i> 文档资产总览</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>状态</th>
+                                    <th>更新时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>会理古城景区资料</td>
+                                    <td>Markdown</td>
+                                    <td>已收录</td>
+                                    <td>最近一次构建后</td>
+                                </tr>
+                                <tr>
+                                    <td>游客服务知识集</td>
+                                    <td>TXT / PDF</td>
+                                    <td>待补充</td>
+                                    <td>请上传新文档</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section" id="feedback-section">
+                <div class="stats-cards" style="margin-bottom:24px">
+                    <div class="stat-card">
+                        <div class="card-icon primary">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>注册用户</p>
+                            <h3 id="total-users">--</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="card-icon success">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>已使用</p>
+                            <h3 id="used-users">--</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="card-icon warning">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <p>未使用</p>
+                            <h3 id="unused-users">--</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card" style="margin-bottom:24px">
+                    <h3><i class="fas fa-users"></i> 用户账号列表</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>头像</th>
+                                    <th>手机号</th>
+                                    <th>注册时间</th>
+                                    <th>最后登录</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-list-tbody">
+                                <tr><td colspan="6">加载中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="table-card">
+                        <h3><i class="fas fa-fire"></i> 高频问题</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>问题</th>
+                                        <th>频次</th>
+                                        <th>备注</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>会理古城开放时间</td>
+                                        <td>--</td>
+                                        <td>从统计接口动态补充</td>
+                                    </tr>
+                                    <tr>
+                                        <td>附近景点</td>
+                                        <td>--</td>
+                                        <td>常见位置类问题</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="table-card">
+                        <h3><i class="fas fa-message"></i> 最近反馈</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>会话</th>
+                                        <th>反馈</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>等待新反馈</td>
+                                    </tr>
+                                    <tr>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>等待新反馈</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section" id="settings-section">
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h4><i class="fas fa-sliders"></i> 模型参数</h4>
+                        <div class="setting-item">
+                            <label for="similarity-threshold">相似度阈值</label>
+                            <input type="range" id="similarity-threshold" class="setting-input" min="0.1" max="1" step="0.1" value="0.7">
+                            <span id="threshold-value">0.7</span>
+                        </div>
+                        <div class="setting-item">
+                            <label for="cache-ttl">缓存时间 (秒)</label>
+                            <input type="number" id="cache-ttl" class="setting-input" min="60" max="86400" value="3600">
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h4><i class="fas fa-bell"></i> 通知设置</h4>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="notify-errors" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>错误通知</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="notify-feedback" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>用户反馈通知</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="notify-system" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>系统状态通知</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h4><i class="fas fa-shield-alt"></i> 安全设置</h4>
+                        <div class="setting-item">
+                            <label for="admin-password">管理员密码</label>
+                            <input type="password" id="admin-password" class="setting-input" placeholder="输入新密码">
+                        </div>
+                        <div class="setting-item">
+                            <label for="confirm-password">确认密码</label>
+                            <input type="password" id="confirm-password" class="setting-input" placeholder="再次输入密码">
+                        </div>
+                        <div class="setting-item">
+                            <label for="session-timeout">会话超时 (分钟)</label>
+                            <input type="number" id="session-timeout" class="setting-input" min="5" max="240" value="30">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="system-info">
+                    <h4><i class="fas fa-info-circle"></i> 系统信息</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">应用版本</span>
+                            <span class="info-value">1.0.0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">启动时间</span>
+                            <span class="info-value" id="start-time">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">运行时长</span>
+                            <span class="info-value" id="uptime">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">内存使用</span>
+                            <span class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">API状态</span>
+                            <span class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">数据库状态</span>
+                            <span class="info-value">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal" id="upload-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-upload"></i> 上传文档</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-instructions">
+                    <p><strong>上传说明：</strong></p>
+                    <ul>
+                        <li>支持 .txt、.pdf、.md 格式文件</li>
+                        <li>单个文件大小不超过 10MB</li>
+                        <li>建议上传景点资料、服务须知、路线说明等知识型文档</li>
+                        <li>上传后请执行一次知识库重建</li>
+                    </ul>
+                </div>
+                <div class="upload-form">
+                    <input type="file" id="modal-file-input" multiple accept=".txt,.pdf,.md">
+                    <div class="file-list" id="file-list">
+                        <p class="empty-state">尚未选择文件</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary close-modal">取消</button>
+                <button id="confirm-upload" class="btn-primary">开始上传</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="rebuild-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> 确认重建知识库</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                    <p><strong>警告：</strong>重建知识库将重新生成当前索引，过程可能持续几分钟。</p>
+                    <p>建议在低峰时段执行，并确保文档上传已完成。</p>
+                </div>
+                <div class="rebuild-options">
+                    <label class="checkbox">
+                        <input type="checkbox" id="keep-original" checked>
+                        <span>保留原始文档</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="clear-cache" checked>
+                        <span>清除缓存</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary close-modal">取消</button>
+                <button id="confirm-rebuild" class="btn-warning">确认重建</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function resolveAdminApiBase() {
+            const customApiBase = (localStorage.getItem("huili_api_base") || "").trim();
+            if (customApiBase) return customApiBase.replace(/\/+$/, "");
+            if (window.location.protocol === "file:") return "http://127.0.0.1:5000";
+            if (["localhost", "127.0.0.1"].includes(window.location.hostname) && window.location.port === "3000") {
+                return "http://127.0.0.1:5000";
+            }
+            return window.location.origin;
+        }
+        const ADMIN_API = resolveAdminApiBase();
+
+        function getAdminHeaders() {
+            return {
+                "X-Admin-User": localStorage.getItem("huili_admin_user") || "",
+                "X-Admin-Password": localStorage.getItem("huili_admin_pwd") || ""
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initAdminLogin();
+        });
+
+        function initAdminLogin() {
+            const savedUser = localStorage.getItem("huili_admin_user") || "";
+            const savedPwd = localStorage.getItem("huili_admin_pwd") || "";
+            if (savedUser && savedPwd) {
+                verifyAndEnter(savedUser, savedPwd);
+            } else {
+                showAdminLoginForm();
+            }
+        }
+
+        function showAdminLoginForm() {
+            const container = document.querySelector('.admin-container');
+            if (!container) return;
+            container.innerHTML = `
+                <div style="position:fixed;inset:0;background:linear-gradient(135deg,#0a1a1a,#0d2d2d,#0a1a1a);display:flex;justify-content:center;align-items:center;z-index:99999">
+                    <div style="background:rgba(255,255,255,0.97);border-radius:24px;padding:44px 40px;width:min(92vw,400px);text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.5)">
+                        <div style="width:72px;height:72px;border-radius:20px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d7377,#b23a2a);margin-bottom:16px;box-shadow:0 12px 30px rgba(13,115,119,0.35)">
+                            <i class="fas fa-shield-halved" style="font-size:2rem;color:#fff"></i>
+                        </div>
+                        <h2 style="margin:8px 0 4px;color:#1a1a1a;font-size:1.4rem">管理后台登录</h2>
+                        <p style="color:#888;margin-bottom:28px;font-size:0.95rem">会理市AI数字人导游平台</p>
+                        <form id="admin-login-form">
+                            <div style="display:flex;align-items:center;border:1.5px solid #e8ecef;border-radius:12px;padding:0 16px;margin-bottom:14px;background:#fafbfc">
+                                <i class="fas fa-user" style="color:#bbb;font-size:0.95rem;width:20px"></i>
+                                <input type="text" id="admin-username" placeholder="请输入管理员账号" value="" style="flex:1;border:none;outline:none;padding:14px 12px;font-size:0.95rem;background:transparent" autocomplete="off">
+                            </div>
+                            <div style="display:flex;align-items:center;border:1.5px solid #e8ecef;border-radius:12px;padding:0 16px;margin-bottom:14px;background:#fafbfc">
+                                <i class="fas fa-lock" style="color:#bbb;font-size:0.95rem;width:20px"></i>
+                                <input type="password" id="admin-password" placeholder="请输入密码" style="flex:1;border:none;outline:none;padding:14px 12px;font-size:0.95rem;background:transparent" autocomplete="off">
+                            </div>
+                            <p id="admin-login-error" style="color:#d6336c;font-size:0.85rem;min-height:1.2em"></p>
+                            <button type="submit" style="padding:14px;background:linear-gradient(135deg,#0d7377,#b23a2a);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;box-shadow:0 6px 20px rgba(13,115,119,0.3)">登录</button>
+                        </form>
+                        <p style="margin-top:16px;color:#aaa;font-size:0.8rem"><i class="fas fa-info-circle"></i> 请联系系统管理员获取登录信息</p>
+                    </div>
+                </div>
+            `;
+            const form = document.getElementById("admin-login-form");
+            if (form) {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById("admin-username").value.trim();
+                    const password = document.getElementById("admin-password").value;
+                    const errorEl = document.getElementById("admin-login-error");
+                    errorEl.textContent = "";
+                    if (!username || !password) {
+                        errorEl.textContent = "请输入账号和密码";
+                        return;
+                    }
+                    try {
+                        const resp = await fetch(`${ADMIN_API}/api/admin/login`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ username, password })
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            localStorage.setItem("huili_admin_user", username);
+                            localStorage.setItem("huili_admin_pwd", password);
+                            location.reload();
+                        } else {
+                            errorEl.textContent = data.error || "登录失败";
+                        }
+                    } catch (err) {
+                        errorEl.textContent = "连接失败: " + err.message;
+                    }
+                });
+            }
+        }
+
+        async function verifyAndEnter(username, password) {
+            try {
+                const resp = await fetch(`${ADMIN_API}/api/admin/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    enterAdminPanel();
+                } else {
+                    localStorage.removeItem("huili_admin_user");
+                    localStorage.removeItem("huili_admin_pwd");
+                    showAdminLoginForm();
+                }
+            } catch (err) {
+                enterAdminPanel();
+            }
+        }
+
+        function enterAdminPanel() {
+            initAdminInterface();
+            initAdminNavigation();
+            initAdminModals();
+            initAdminClock();
+            loadAdminStats();
+            initScenicManagement();
+            initAdminPasswordChange();
+        }
+
+        function initAdminNavigation() {
+            const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+            const sections = document.querySelectorAll('.page-section');
+            const breadcrumb = document.querySelector('.breadcrumb span:last-child');
+
+            const sectionNames = {
+                'overview-section': '实时运营面板',
+                'scenic-section': '景区图库管理',
+                'knowledge-section': '知识库管理',
+                'feedback-section': '反馈与日志',
+                'settings-section': '系统设置'
+            };
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.dataset.target;
+                    if (!targetId) return;
+
+                    navItems.forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+
+                    sections.forEach(s => s.classList.remove('active'));
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) targetSection.classList.add('active');
+
+                    if (breadcrumb && sectionNames[targetId]) {
+                        breadcrumb.textContent = sectionNames[targetId];
+                    }
+                });
+            });
+        }
+
+        function initAdminModals() {
+            document.querySelectorAll('[data-open-modal]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modalId = btn.dataset.openModal;
+                    const modal = document.getElementById(modalId);
+                    if (modal) modal.classList.add('active');
+                });
+            });
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('active');
+                });
+            });
+
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modal = btn.closest('.modal');
+                    if (modal) modal.classList.remove('active');
+                });
+            });
+        }
+
+        function initAdminClock() {
+            function updateClock() {
+                const el = document.getElementById('current-time');
+                if (el) {
+                    const now = new Date();
+                    el.textContent = now.toLocaleString('zh-CN', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+                }
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        async function loadAdminStats() {
+            try {
+                const resp = await fetch(`${ADMIN_API}/api/user/stats`, {
+                    headers: getAdminHeaders()
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    const stats = data.stats || {};
+                    const totalEl = document.getElementById('total-users');
+                    if (totalEl) totalEl.textContent = stats.total_users || 0;
+
+                    const totalReqEl = document.querySelector('[data-stat="total_requests"]');
+                    if (totalReqEl) totalReqEl.textContent = '--';
+
+                    const activeEl = document.querySelector('[data-stat="active_sessions"]');
+                    if (activeEl) activeEl.textContent = '1';
+
+                    const users = data.users || [];
+                    const tbody = document.getElementById('user-list-tbody');
+                    if (tbody && users.length > 0) {
+                        tbody.innerHTML = users.map(u => {
+                            const date = u.created_at ? new Date(u.created_at).toLocaleDateString('zh-CN') : '--';
+                            const lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString('zh-CN') : '--';
+                            const avatarSrc = u.avatar ? `${ADMIN_API}/api/avatar/${u.phone}?t=${Date.now()}` : '';
+                            const avatarHtml = avatarSrc
+                                ? `<img src="${avatarSrc}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">`
+                                : '<i class="fas fa-user"></i>';
+                            return `<tr>
+                                <td>${avatarHtml}</td>
+                                <td>${u.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}</td>
+                                <td>${date}</td>
+                                <td>${lastLogin}</td>
+                                <td><span style="color:#2f9e44">正常</span></td>
+                                <td>--</td>
+                            </tr>`;
+                        }).join('');
+                    } else if (tbody) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">暂无用户</td></tr>';
+                    }
+                }
+            } catch (e) {
+                console.error('加载统计数据失败:', e);
+            }
+
+            try {
+                const apiStatusEl = document.getElementById('api-status');
+                if (apiStatusEl) apiStatusEl.textContent = '正常';
+                const dbStatusEl = document.getElementById('db-status');
+                if (dbStatusEl) dbStatusEl.textContent = '正常';
+                const memEl = document.getElementById('memory-usage');
+                if (memEl) memEl.textContent = '模拟缓存';
+                const verEl = document.getElementById('app-version');
+                if (verEl) verEl.textContent = 'v1.0.0';
+                const startEl = document.getElementById('start-time');
+                if (startEl) startEl.textContent = new Date().toLocaleString('zh-CN');
+            } catch (e) {}
+        }
+
+        function initScenicManagement() {
+            loadScenicImages();
+
+            const addForm = document.getElementById("add-scenic-form");
+            if (addForm) {
+                addForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const placeName = document.getElementById("scenic-place-name").value.trim();
+                    const description = document.getElementById("scenic-description").value.trim();
+                    const imageUrl = document.getElementById("scenic-image-url").value.trim();
+                    const fileInput = document.getElementById("scenic-file");
+                    const errorEl = document.getElementById("add-scenic-error");
+                    errorEl.textContent = "";
+
+                    if (!placeName) {
+                        errorEl.textContent = "请填写景区名称";
+                        return;
+                    }
+                    if (!imageUrl && (!fileInput.files || !fileInput.files[0])) {
+                        errorEl.textContent = "请上传图片或输入图片链接";
+                        return;
+                    }
+
+                    try {
+                        let response;
+                        if (imageUrl) {
+                            response = await fetch(`${ADMIN_API}/api/admin/scenic_images`, {
+                                method: "POST",
+                                headers: getAdminHeaders(),
+                                body: JSON.stringify({ place_name: placeName, description, image_url: imageUrl })
+                            });
+                        } else {
+                            const formData = new FormData();
+                            formData.append("place_name", placeName);
+                            formData.append("description", description);
+                            formData.append("file", fileInput.files[0]);
+                            response = await fetch(`${ADMIN_API}/api/admin/scenic_images`, {
+                                method: "POST",
+                                headers: getAdminHeaders(),
+                                body: formData
+                            });
+                        }
+                        const result = await response.json();
+                        if (result.success) {
+                            addForm.reset();
+                            loadScenicImages();
+                        } else {
+                            errorEl.textContent = result.error || "添加失败";
+                        }
+                    } catch (err) {
+                        errorEl.textContent = "请求失败: " + err.message;
+                    }
+                });
+            }
+
+            const searchBtn = document.getElementById("scenic-search-btn");
+            if (searchBtn) {
+                searchBtn.addEventListener("click", () => loadScenicImages());
+            }
+
+            const searchInput = document.getElementById("scenic-search-keyword");
+            if (searchInput) {
+                searchInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") loadScenicImages();
+                });
+            }
+        }
+
+        async function loadScenicImages() {
+            const tbody = document.getElementById("scenic-images-tbody");
+            const countEl = document.getElementById("local-image-count");
+            if (!tbody) return;
+
+            const keyword = (document.getElementById("scenic-search-keyword")?.value || "").trim();
+            const url = keyword
+                ? `${ADMIN_API}/api/admin/scenic_images?keyword=${encodeURIComponent(keyword)}`
+                : `${ADMIN_API}/api/admin/scenic_images`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: getAdminHeaders()
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const images = data.images || [];
+                    if (countEl) countEl.textContent = data.total || images.length;
+                    if (images.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">暂无图片，请添加</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = images.map(img => {
+                        const imgSrc = img.url.startsWith("/") ? `${ADMIN_API}${img.url}` : img.url;
+                        const source = img.filename ? "本地上传" : "外部链接";
+                        const date = img.created_at ? new Date(img.created_at).toLocaleDateString("zh-CN") : "--";
+                        return `<tr>
+                            <td><img src="${imgSrc}" style="width:60px;height:45px;object-fit:cover;border-radius:8px" onerror="this.outerHTML='<span style=color:#ccc>无预览</span>'"></td>
+                            <td>${escapeHtmlAdmin(img.place_name)}</td>
+                            <td>${escapeHtmlAdmin(img.description || "--")}</td>
+                            <td><span style="padding:3px 8px;border-radius:6px;font-size:0.78rem;background:${img.filename ? 'rgba(47,158,68,0.1);color:#2f9e44' : 'rgba(13,115,119,0.1);color:#0d7377'}">${source}</span></td>
+                            <td>${date}</td>
+                            <td><button class="btn-small" style="background:rgba(232,89,12,0.1);color:#e8590c" onclick="deleteScenicImage('${img.id}')"><i class="fas fa-trash"></i> 删除</button></td>
+                        </tr>`;
+                    }).join("");
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#d6336c">${data.error || "加载失败"}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#d6336c">请求失败: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function deleteScenicImage(imageId) {
+            if (!confirm("确定要删除这张图片吗？")) return;
+            try {
+                const response = await fetch(`${ADMIN_API}/api/admin/scenic_images/${imageId}`, {
+                    method: "DELETE",
+                    headers: getAdminHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    loadScenicImages();
+                } else {
+                    alert("删除失败: " + (result.error || "未知错误"));
+                }
+            } catch (err) {
+                alert("请求失败: " + err.message);
+            }
+        }
+
+        function escapeHtmlAdmin(str) {
+            const div = document.createElement("div");
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function initAdminPasswordChange() {
+            const pwdInput = document.getElementById("admin-password");
+            const confirmPwd = document.getElementById("confirm-password");
+            const saveBtn = document.querySelector('[data-stat]') || null;
+
+            const settingsSection = document.getElementById("settings-section");
+            if (!settingsSection) return;
+
+            const pwdCard = settingsSection.querySelector('.settings-card:nth-child(3)');
+            if (pwdCard) {
+                const savePwdBtn = document.createElement('button');
+                savePwdBtn.className = 'btn-primary';
+                savePwdBtn.style.cssText = 'margin-top:12px;width:100%';
+                savePwdBtn.innerHTML = '<i class="fas fa-save"></i> 保存密码';
+                savePwdBtn.addEventListener('click', async () => {
+                    const oldPwd = document.getElementById("admin-password")?.value;
+                    const newPwd = document.getElementById("confirm-password")?.value;
+                    if (!oldPwd || !newPwd) {
+                        alert("请输入原密码和新密码");
+                        return;
+                    }
+                    if (newPwd.length < 6) {
+                        alert("新密码至少6位");
+                        return;
+                    }
+                    const username = localStorage.getItem("huili_admin_user") || "";
+                    try {
+                        const resp = await fetch(`${ADMIN_API}/api/admin/change_password`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ username, old_password: oldPwd, new_password: newPwd })
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            localStorage.setItem("huili_admin_pwd", newPwd);
+                            alert("密码修改成功！");
+                            document.getElementById("admin-password").value = "";
+                            document.getElementById("confirm-password").value = "";
+                        } else {
+                            alert(data.error || "修改失败");
+                        }
+                    } catch (err) {
+                        alert("请求失败: " + err.message);
+                    }
+                });
+                pwdCard.appendChild(savePwdBtn);
+            }
+
+            const logoutBtn = document.querySelector('.btn-logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem("huili_admin_user");
+                    localStorage.removeItem("huili_admin_pwd");
+                    location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

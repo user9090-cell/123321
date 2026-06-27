@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号管理 - 会理市AI数字人导游</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .accounts-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+        .accounts-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .accounts-header a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(13, 115, 119, 0.08);
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .accounts-header a:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+        .accounts-header h2 {
+            flex: 1;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        .profile-card {
+            background: var(--panel-color);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: 0 18px 44px var(--shadow-color);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+        }
+        .profile-avatar-section {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #b23a2a);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(13, 115, 119, 0.25);
+            transition: transform 0.2s;
+        }
+        .profile-avatar-large:hover {
+            transform: scale(1.05);
+        }
+        .profile-avatar-large i {
+            font-size: 2.5rem;
+            color: #fff;
+        }
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-avatar-large:hover::after {
+            content: "\f030";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .profile-avatar-large .avatar-text {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .profile-phone {
+            margin-top: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .info-card {
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(13, 115, 119, 0.04);
+            border: 1px solid var(--border-color);
+        }
+        .info-card label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        .info-card span {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 24px 0 16px;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .section-title i {
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        .form-group input {
+            width: 100%;
+            border: 1.5px solid #e8ecef;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            background: #fafbfc;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(13, 115, 119, 0.1);
+            background: #fff;
+        }
+        .form-message {
+            font-size: 0.85rem;
+            margin-top: 6px;
+            min-height: 1.2em;
+        }
+        .form-message.error {
+            color: var(--danger-color);
+        }
+        .form-message.success {
+            color: var(--success-color);
+        }
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .btn-row .btn-primary {
+            flex: 1;
+            justify-content: center;
+        }
+        .danger-zone {
+            margin-top: 32px;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1.5px dashed rgba(232, 89, 12, 0.3);
+            background: rgba(232, 89, 12, 0.04);
+        }
+        .danger-zone h4 {
+            color: var(--danger-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .danger-zone p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+        .btn-danger {
+            padding: 12px 20px;
+            background: var(--danger-color);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(232, 89, 12, 0.25);
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(232, 89, 12, 0.35);
+        }
+        .not-logged-in {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .not-logged-in i {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 20px;
+        }
+        .not-logged-in h3 {
+            color: var(--text-color);
+            margin-bottom: 12px;
+        }
+        .not-logged-in p {
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+        .accounts-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        .accounts-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="accounts-container">
+        <div class="accounts-header">
+            <a href="index.html"><i class="fas fa-arrow-left"></i> 返回首页</a>
+            <h2><i class="fas fa-user-cog"></i> 账号管理</h2>
+        </div>
+
+        <div id="profile-content" style="display:none">
+            <div class="profile-card">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar-large" id="profile-avatar" title="点击更换头像">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input type="file" id="profile-avatar-input" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+                    <div class="profile-phone" id="profile-phone">--</div>
+                </div>
+
+                <div class="profile-info-grid">
+                    <div class="info-card">
+                        <label><i class="fas fa-calendar"></i> 注册时间</label>
+                        <span id="profile-created">--</span>
+                    </div>
+                    <div class="info-card">
+                        <label><i class="fas fa-clock"></i> 最近登录</label>
+                        <span id="profile-last-login">--</span>
+                    </div>
+                </div>
+
+                <div class="section-title"><i class="fas fa-key"></i> 修改密码</div>
+                <form id="change-password-form">
+                    <div class="form-group">
+                        <label>当前密码</label>
+                        <input type="password" id="old-password" placeholder="请输入当前密码" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <input type="password" id="new-password" placeholder="请输入新密码（至少6位）" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>确认新密码</label>
+                        <input type="password" id="confirm-new-password" placeholder="请再次输入新密码" autocomplete="off">
+                    </div>
+                    <p class="form-message" id="password-message"></p>
+                    <div class="btn-row">
+                        <button type="submit" class="btn-primary"><i class="fas fa-check"></i> 修改密码</button>
+                    </div>
+                </form>
+
+                <div class="danger-zone">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 危险操作</h4>
+                    <p>注销账号后将永久删除您的所有数据，此操作不可恢复。</p>
+                    <button class="btn-danger" id="delete-account-btn"><i class="fas fa-trash"></i> 注销账号</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="not-logged-in" class="not-logged-in">
+            <i class="fas fa-user-lock"></i>
+            <h3>请登录账号</h3>
+            <p>登录后可管理您的账号信息</p>
+
+            <div class="auth-tabs" id="accounts-tabs" style="margin:20px auto;max-width:340px">
+                <button class="auth-tab active" data-tab="visitor-login">游客登录</button>
+                <button class="auth-tab" data-tab="admin-login">管理员登录</button>
+            </div>
+
+            <form id="visitor-login-form" style="max-width:340px;margin:0 auto;text-align:left">
+                <div style="display:flex;align-items:center;border:1.5px solid #e8ecef;border-radius:12px;padding:0 16px;margin-bottom:12px;background:#fafbfc">
+                    <i class="fas fa-phone" style="color:#bbb;font-size:0.9rem;width:20px"></i>
+                    <input type="tel" id="v-phone" placeholder="手机号" maxlength="11" style="flex:1;border:none;outline:none;padding:12px 10px;font-size:0.95rem;background:transparent" autocomplete="off">
+                </div>
+                <div style="display:flex;align-items:center;border:1.5px solid #e8ecef;border-radius:12px;padding:0 16px;margin-bottom:8px;background:#fafbfc">
+                    <i class="fas fa-lock" style="color:#bbb;font-size:0.9rem;width:20px"></i>
+                    <input type="password" id="v-password" placeholder="密码" style="flex:1;border:none;outline:none;padding:12px 10px;font-size:0.95rem;background:transparent" autocomplete="off">
+                </div>
+                <p id="v-error" style="color:#d6336c;font-size:0.85rem;min-height:1.2em"></p>
+                <button type="submit" style="padding:12px;background:linear-gradient(135deg,#0d7377,#b23a2a);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;box-shadow:0 6px 20px rgba(13,115,119,0.3)">登录</button>
+            </form>
+
+            <form id="admin-login-form" style="display:none;max-width:340px;margin:0 auto;text-align:left">
+                <div style="display:flex;align-items:center;border:1.5px solid #e8ecef;border-radius:12px;padding:0 16px;margin-bottom:12px;background:#fafbfc">
+                    <i class="fas fa-user" style="color:#bbb;font-size:0.9rem;width:20px"></i>
+                    <input type="text" id="a-username" placeholder="管理员账号" style="flex:1;border:none;outline:none;padding:12px 10px;font-size:0.95rem;background:transparent" autocomplete="off">
+                </div>
+                <div style="display:flex;align-items:center;border:1.5px solid #e8ecef;border-radius:12px;padding:0 16px;margin-bottom:8px;background:#fafbfc">
+                    <i class="fas fa-lock" style="color:#bbb;font-size:0.9rem;width:20px"></i>
+                    <input type="password" id="a-password" placeholder="密码" style="flex:1;border:none;outline:none;padding:12px 10px;font-size:0.95rem;background:transparent" autocomplete="off">
+                </div>
+                <p id="a-error" style="color:#d6336c;font-size:0.85rem;min-height:1.2em"></p>
+                <button type="submit" style="padding:12px;background:linear-gradient(135deg,#0d7377,#b23a2a);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;box-shadow:0 6px 20px rgba(13,115,119,0.3)">登录</button>
+            </form>
+
+            <p style="margin-top:16px;color:#aaa;font-size:0.8rem">没有账号？<a href="index.html" style="color:#0d7377">前往注册</a></p>
+        </div>
+    </div>
+
+    <div class="accounts-footer">
+        <span>&copy; 2026 会理市AI数字人导游系统 -</span>
+        <a href="index.html">返回首页</a>
+    </div>
+
+    <script>
+    (function() {
+        "use strict";
+        function resolveApiBase() {
+            const customApiBase = (localStorage.getItem("huili_api_base") || "").trim();
+            if (customApiBase) return customApiBase.replace(/\/+$/, "");
+            if (window.location.protocol === "file:") return "http://127.0.0.1:5000";
+            if (["localhost", "127.0.0.1"].includes(window.location.hostname) && window.location.port === "3000") {
+                return "http://127.0.0.1:5000";
+            }
+            return window.location.origin;
+        }
+        const API_BASE = resolveApiBase();
+
+        const phone = localStorage.getItem("huili_phone") || "";
+        const password = localStorage.getItem("huili_password") || "";
+        const sessionId = localStorage.getItem("huili_session_id") || "";
+        const adminUser = localStorage.getItem("huili_admin_user") || "";
+        const adminPwd = localStorage.getItem("huili_admin_pwd") || "";
+
+        const profileContent = document.getElementById("profile-content");
+        const notLoggedIn = document.getElementById("not-logged-in");
+
+        const isAdmin = adminUser && adminPwd;
+        const isUser = phone && password;
+
+        initLoginForms();
+
+        if (isAdmin || isUser) {
+            showProfile();
+        }
+
+        async function showProfile() {
+            profileContent.style.display = "";
+            notLoggedIn.style.display = "none";
+            try {
+                await loadProfile();
+                initProfileFeatures();
+            } catch (e) {
+                console.error("加载失败:", e);
+                profileContent.style.display = "none";
+                notLoggedIn.style.display = "";
+                clearStaleCredentials();
+            }
+        }
+
+        function clearStaleCredentials() {
+            if (isAdmin) {
+                localStorage.removeItem("huili_admin_user");
+                localStorage.removeItem("huili_admin_pwd");
+            }
+            if (isUser) {
+                localStorage.removeItem("huili_session_id");
+                localStorage.removeItem("huili_phone");
+                localStorage.removeItem("huili_password");
+            }
+        }
+
+        function initLoginForms() {
+            const tabs = document.querySelectorAll("#accounts-tabs .auth-tab");
+            const visitorForm = document.getElementById("visitor-login-form");
+            const adminForm = document.getElementById("admin-login-form");
+
+            tabs.forEach(tab => {
+                tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    const target = tab.dataset.tab;
+                    if (visitorForm) visitorForm.style.display = target === "visitor-login" ? "" : "none";
+                    if (adminForm) adminForm.style.display = target === "admin-login" ? "" : "none";
+                });
+            });
+
+            if (visitorForm) {
+                visitorForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const vPhone = document.getElementById("v-phone").value.trim();
+                    const vPwd = document.getElementById("v-password").value;
+                    const vError = document.getElementById("v-error");
+                    vError.textContent = "";
+                    if (!vPhone || !vPwd) { vError.textContent = "请输入手机号和密码"; return; }
+                    try {
+                        const resp = await fetch(`${API_BASE}/api/login`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ phone: vPhone, password: vPwd })
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            localStorage.setItem("huili_phone", vPhone);
+                            localStorage.setItem("huili_password", vPwd);
+                            localStorage.setItem("huili_session_id", data.session_id || "");
+                            location.reload();
+                        } else {
+                            vError.textContent = data.error || "登录失败";
+                        }
+                    } catch (err) {
+                        vError.textContent = "连接失败: " + err.message;
+                    }
+                });
+            }
+
+            if (adminForm) {
+                adminForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const aUser = document.getElementById("a-username").value.trim();
+                    const aPwd = document.getElementById("a-password").value;
+                    const aError = document.getElementById("a-error");
+                    aError.textContent = "";
+                    if (!aUser || !aPwd) { aError.textContent = "请输入账号和密码"; return; }
+                    try {
+                        const resp = await fetch(`${API_BASE}/api/admin/login`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ username: aUser, password: aPwd })
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            localStorage.setItem("huili_admin_user", aUser);
+                            localStorage.setItem("huili_admin_pwd", aPwd);
+                            location.reload();
+                        } else {
+                            aError.textContent = data.error || "登录失败";
+                        }
+                    } catch (err) {
+                        aError.textContent = "连接失败: " + err.message;
+                    }
+                });
+            }
+        }
+
+        async function apiRequest(path, options = {}) {
+            const headers = { "Content-Type": "application/json" };
+            if (sessionId) headers["X-Session-ID"] = sessionId;
+            let response;
+            try {
+                response = await fetch(`${API_BASE}${path}`, {
+                    ...options,
+                    headers: { ...headers, ...options.headers }
+                });
+            } catch (fetchErr) {
+                throw new Error("网络连接失败，请检查服务器是否启动");
+            }
+            let payload;
+            try {
+                payload = await response.json();
+            } catch (parseErr) {
+                if (!response.ok) throw new Error(`请求失败 (${response.status})`);
+                throw new Error("响应解析失败");
+            }
+            if (!response.ok) throw new Error(payload.error || `请求失败 (${response.status})`);
+            return payload;
+        }
+
+        async function loadProfile() {
+            try {
+                if (isAdmin) {
+                    document.getElementById("profile-phone").textContent = adminUser;
+                    const resp = await fetch(`${API_BASE}/api/admin/info?username=${encodeURIComponent(adminUser)}`);
+                    const data = await resp.json();
+                    if (data.success && data.admin) {
+                        document.getElementById("profile-created").textContent = data.admin.created_at ? new Date(data.admin.created_at).toLocaleDateString("zh-CN") : "--";
+                        document.getElementById("profile-last-login").textContent = data.admin.last_login ? new Date(data.admin.last_login).toLocaleDateString("zh-CN") : "--";
+                    }
+                    const avatarEl = document.getElementById("profile-avatar");
+                    avatarEl.innerHTML = '<i class="fas fa-user-shield" style="font-size:2.5rem;color:#fff"></i>';
+                    return;
+                }
+
+                const result = await apiRequest(`/api/user/info?phone=${encodeURIComponent(phone)}`);
+                if (result.success && result.user) {
+                    const user = result.user;
+                    document.getElementById("profile-phone").textContent = user.phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+                    document.getElementById("profile-created").textContent = user.created_at ? new Date(user.created_at).toLocaleDateString("zh-CN") : "--";
+                    document.getElementById("profile-last-login").textContent = user.last_login ? new Date(user.last_login).toLocaleDateString("zh-CN") : "--";
+
+                    const avatarEl = document.getElementById("profile-avatar");
+                    if (user.avatar) {
+                        avatarEl.innerHTML = `<img src="${API_BASE}/api/avatar/${phone}?t=${Date.now()}" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+                    } else {
+                        const initial = phone.slice(-1);
+                        avatarEl.innerHTML = `<span class="avatar-text">${initial}</span>`;
+                    }
+                }
+            } catch (e) {
+                console.error("加载用户信息失败:", e);
+            }
+        }
+
+        function initProfileFeatures() {
+            const avatarEl = document.getElementById("profile-avatar");
+            const avatarInput = document.getElementById("profile-avatar-input");
+            if (avatarEl && avatarInput && !isAdmin) {
+                avatarEl.addEventListener("click", () => avatarInput.click());
+                avatarInput.addEventListener("change", async () => {
+                    const file = avatarInput.files && avatarInput.files[0];
+                    if (!file) return;
+                    const formData = new FormData();
+                    formData.append("avatar", file);
+                    try {
+                        const resp = await fetch(`${API_BASE}/api/avatar/upload`, {
+                            method: "POST",
+                            headers: { "X-Session-ID": sessionId, "X-Phone": phone },
+                            body: formData
+                        });
+                        const result = await resp.json();
+                        if (result.success) {
+                            loadProfile();
+                        } else {
+                            alert(result.error || "上传失败");
+                        }
+                    } catch (e) {
+                        alert("头像上传失败: " + e.message);
+                    }
+                });
+            }
+
+            const changePasswordForm = document.getElementById("change-password-form");
+            const passwordMessage = document.getElementById("password-message");
+            if (changePasswordForm) {
+                changePasswordForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const oldPwd = document.getElementById("old-password").value;
+                    const newPwd = document.getElementById("new-password").value;
+                    const confirmPwd = document.getElementById("confirm-new-password").value;
+
+                    passwordMessage.textContent = "";
+                    passwordMessage.className = "form-message";
+
+                    if (!oldPwd || !newPwd || !confirmPwd) {
+                        passwordMessage.textContent = "请填写所有密码字段";
+                        passwordMessage.classList.add("error");
+                        return;
+                    }
+                    if (newPwd !== confirmPwd) {
+                        passwordMessage.textContent = "两次新密码不一致";
+                        passwordMessage.classList.add("error");
+                        return;
+                    }
+                    if (newPwd.length < 6) {
+                        passwordMessage.textContent = "新密码至少6位";
+                        passwordMessage.classList.add("error");
+                        return;
+                    }
+
+                    try {
+                        if (isAdmin) {
+                            const resp = await fetch(`${API_BASE}/api/admin/change_password`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ username: adminUser, old_password: oldPwd, new_password: newPwd })
+                            });
+                            const data = await resp.json();
+                            if (!data.success) throw new Error(data.error || "修改失败");
+                            localStorage.setItem("huili_admin_pwd", newPwd);
+                        } else {
+                            await apiRequest("/api/user/change_password", {
+                                method: "POST",
+                                body: JSON.stringify({ phone, old_password: oldPwd, new_password: newPwd })
+                            });
+                            localStorage.setItem("huili_password", newPwd);
+                        }
+                        passwordMessage.textContent = "密码修改成功";
+                        passwordMessage.classList.add("success");
+                        document.getElementById("old-password").value = "";
+                        document.getElementById("new-password").value = "";
+                        document.getElementById("confirm-new-password").value = "";
+                    } catch (err) {
+                        passwordMessage.textContent = err.message;
+                        passwordMessage.classList.add("error");
+                    }
+                });
+            }
+
+            const deleteBtn = document.getElementById("delete-account-btn");
+            if (deleteBtn) {
+                if (isAdmin) {
+                    deleteBtn.style.display = "none";
+                } else {
+                    deleteBtn.addEventListener("click", async () => {
+                        const pwd = prompt("请输入密码以确认注销账号：");
+                        if (!pwd) return;
+                        if (!confirm("确定要注销账号吗？此操作不可恢复！")) return;
+                        try {
+                            await apiRequest("/api/user/delete", {
+                                method: "POST",
+                                body: JSON.stringify({ phone, password: pwd })
+                            });
+                            localStorage.removeItem("huili_session_id");
+                            localStorage.removeItem("huili_phone");
+                            localStorage.removeItem("huili_password");
+                            alert("账号已注销");
+                            window.location.href = "index.html";
+                        } catch (err) {
+                            alert("注销失败: " + err.message);
+                        }
+                    });
+                }
+            }
+        }
+    })();
+    </script>
+</body>
+</html>

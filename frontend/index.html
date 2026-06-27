@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会理市AI数字人导游 - 游客端</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 登录/注册覆盖层 -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h1>会理市AI数字人导游</h1>
+                <p>探索千年古城，智享会理风光</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">登录</button>
+                <button class="auth-tab" data-tab="register">注册</button>
+            </div>
+            <form class="auth-form" id="login-form">
+                <div class="auth-field">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" id="login-phone" placeholder="请输入手机号" maxlength="11" autocomplete="off">
+                </div>
+                <div class="auth-field">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="请输入密码" autocomplete="off">
+                </div>
+                <p class="auth-error" id="login-error"></p>
+                <button type="submit" class="auth-submit">登录</button>
+            </form>
+            <form class="auth-form" id="register-form" style="display:none">
+                <div class="avatar-upload-area">
+                    <div class="avatar-preview" id="avatar-preview">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <input type="file" id="avatar-input" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+                    <button type="button" class="avatar-btn" id="avatar-select-btn">选择头像</button>
+                </div>
+                <div class="auth-field">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" id="register-phone" placeholder="请输入手机号" maxlength="11" autocomplete="off">
+                </div>
+                <div class="auth-field">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="register-password" placeholder="请设置密码（至少6位）" autocomplete="off">
+                </div>
+                <div class="auth-field">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="register-confirm" placeholder="请确认密码" autocomplete="off">
+                </div>
+                <p class="auth-error" id="register-error"></p>
+                <button type="submit" class="auth-submit">注册</button>
+            </form>
+            <p class="auth-hint"><i class="fas fa-shield-halved"></i> 您的账号将被安全保存，下次访问自动登录</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-map-marked-alt"></i>
+                <h1>会理市AI数字人导游</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active"><i class="fas fa-home"></i> 首页</a>
+                <a href="#" id="scenic-gallery-btn"><i class="fas fa-images"></i> 景区图库</a>
+                <a href="accounts.html" id="account-manage-btn"><i class="fas fa-user-cog"></i> 账号</a>
+                <button id="theme-toggle" class="btn-icon" title="切换主题"><i class="fas fa-moon"></i></button>
+                <div class="nav-avatar" id="nav-avatar" title="点击更换头像">
+                    <i class="fas fa-user"></i>
+                </div>
+                <input type="file" id="nav-avatar-input" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+                <button id="logout-btn" class="btn-icon" title="退出登录"><i class="fas fa-right-from-bracket"></i></button>
+            </div>
+        </header>
+
+        <div class="main-content">          
+            <div class="digital-human-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-person-walking-luggage"></i> AI数字人导游</h2>
+                </div>
+                
+                <div id="digital-human-container">
+                    <div class="loading-overlay">
+                        <div class="spinner"></div>
+                        <p>正在加载AI导游模型...</p>
+                    </div>
+                </div>
+
+                <div class="live2d-status" id="live2d-status">
+                    <span class="status-dot"></span>
+                    <span id="model-status-text">模型加载中...</span>
+                </div>
+                
+                <div class="human-controls">
+                    <div class="control-group">
+                        <label for="voice-speed"><i class="fas fa-tachometer-alt"></i> 语速</label>
+                        <input type="range" id="voice-speed" min="0.5" max="2" step="0.1" value="1">
+                        <span id="speed-value">1.0x</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="voice-volume"><i class="fas fa-volume-up"></i> 音量</label>
+                        <input type="range" id="voice-volume" min="0" max="1" step="0.1" value="0.8">
+                        <span id="volume-value">80%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：聊天交互区 -->
+            <div class="chat-section">
+                <!-- 用户信息栏 -->
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3>游客</h3>
+                        <p id="session-status">会话已连接</p>
+                    </div>
+                    <div class="user-actions">
+                        <button id="get-location" class="btn-icon" title="获取当前位置">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </button>
+                        <button id="clear-chat" class="btn-icon" title="清空对话">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 猜你喜欢推荐 -->
+                <div class="recommendations" id="recommendations">
+                    <h4><i class="fas fa-lightbulb"></i> 猜你喜欢</h4>
+                    <div class="recommendation-cards">
+                        <div class="card" data-query="会理古城开放时间">
+                            <i class="fas fa-clock"></i>
+                            <span>会理古城开放时间</span>
+                        </div>
+                        <div class="card" data-query="会理美食推荐">
+                            <i class="fas fa-utensils"></i>
+                            <span>会理美食推荐</span>
+                        </div>
+                        <div class="card" data-query="附近景点">
+                            <i class="fas fa-map-pin"></i>
+                            <span>附近景点</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 聊天消息区域 -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- 欢迎消息 -->
+                    <div class="message bot-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                您好！我是会理市AI数字人导游，很高兴为您服务！😊
+                                <br><br>
+                                我可以为您提供：
+                                <ul>
+                                    <li>会理景点介绍与推荐</li>
+                                    <li>开放时间与门票信息</li>
+                                    <li>美食与住宿建议</li>
+                                    <li>路线规划与交通指南</li>
+                                </ul>
+                                请告诉我您想了解什么？
+                            </div>
+                            <div class="message-time">刚刚</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="input-area">
+                    <div class="input-controls">
+                        <button id="voice-toggle" class="btn-icon" title="语音输入">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button id="nearby-attractions" class="btn-icon" title="附近景点">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </button>
+                        <button id="attach-file" class="btn-icon" title="附件">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="text" id="user-input" placeholder="输入您的问题，或点击麦克风进行语音输入..." autocomplete="off">
+                        <button id="send-button" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> 发送
+                        </button>
+                    </div>
+                    
+                    <div class="voice-status" id="voice-status">
+                        <i class="fas fa-microphone-slash"></i>
+                        <span>语音输入已关闭</span>
+                    </div>
+                </div>
+
+                <!-- 语音输入指示器 -->
+                <div class="voice-indicator" id="voice-indicator">
+                    <div class="voice-wave">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+                    <p>正在聆听...请说话</p>
+                    <button id="stop-voice" class="btn-small">停止</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部状态栏 -->
+        <footer class="footer">
+            <div class="status-info">
+                <div class="status-item">
+                    <i class="fas fa-server"></i>
+                    <span id="api-status">API: 连接正常</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-brain"></i>
+                    <span id="model-status">模型: 小米大模型</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-clock"></i>
+                    <span id="response-time">响应: -- ms</span>
+                </div>
+            </div>
+            <div class="footer-links">
+                <span>© 2026 会理市AI数字人导游系统 -</span>
+                <a href="#" id="show-help"><i class="fas fa-question-circle"></i> 帮助</a>
+                <a href="#" id="show-survey"><i class="fas fa-star"></i> 满意度调研</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 帮助模态框 -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> 使用帮助</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h4><i class="fas fa-comments"></i> 聊天功能</h4>
+                    <ul>
+                        <li>在输入框中直接输入问题，点击发送或按Enter键</li>
+                        <li>点击麦克风图标进行语音输入</li>
+                        <li>点击"猜你喜欢"卡片快速提问</li>
+                        <li>点击消息旁边的👍/👎图标提供反馈</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4><i class="fas fa-robot"></i> 数字人控制</h4>
+                    <ul>
+                        <li>移动鼠标，数字人眼睛会跟随鼠标方向</li>
+                        <li>点击数字人可以触发互动表情和动作</li>
+                        <li>点击"表情"按钮切换数字人表情</li>
+                        <li>点击"动画"按钮播放/暂停待机动画</li>
+                        <li>数字人说话时会自动播放说话动画</li>
+                        <li>调节语速和音量控制语音输出</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4><i class="fas fa-map-marked-alt"></i> 位置功能</h4>
+                    <ul>
+                        <li>点击地图标记图标获取当前位置</li>
+                        <li>系统会根据您的位置推荐附近景点</li>
+                        <li>位置信息仅用于个性化推荐，不会保存</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 满意度调研模态框 -->
+    <div class="modal" id="survey-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-star"></i> 满意度调研</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="survey-section">
+                    <h4>您对本次导览服务满意吗？</h4>
+                    <div class="survey-stars" id="survey-stars">
+                        <span class="survey-star" data-value="1"><i class="fas fa-star"></i></span>
+                        <span class="survey-star" data-value="2"><i class="fas fa-star"></i></span>
+                        <span class="survey-star" data-value="3"><i class="fas fa-star"></i></span>
+                        <span class="survey-star" data-value="4"><i class="fas fa-star"></i></span>
+                        <span class="survey-star" data-value="5"><i class="fas fa-star"></i></span>
+                    </div>
+                    <p class="survey-rating-text" id="survey-rating-text">请选择评分</p>
+                </div>
+                <div class="survey-section">
+                    <h4>您有什么建议？</h4>
+                    <textarea id="survey-comment" rows="4" placeholder="请输入您的建议或意见（选填）..."></textarea>
+                </div>
+                <button id="submit-survey" class="btn-primary" disabled>提交反馈</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 附近景点模态框 -->
+    <div class="modal" id="nearby-modal">
+        <div class="modal-content" style="max-width:800px">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marker-alt"></i> 附近景点</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="map-container" style="width:100%;height:350px;border-radius:12px;margin-bottom:12px;display:none"></div>
+                <div class="location-controls">
+                    <div class="input-group">
+                        <label for="latitude">纬度</label>
+                        <input type="number" id="latitude" step="0.0001" value="26.6584">
+                    </div>
+                    <div class="input-group">
+                        <label for="longitude">经度</label>
+                        <input type="number" id="longitude" step="0.0001" value="102.2437">
+                    </div>
+                    <div class="input-group">
+                        <label for="radius">搜索半径 (km)</label>
+                        <input type="number" id="radius" min="1" max="100" value="20">
+                    </div>
+                    <button id="search-nearby" class="btn-primary">搜索</button>
+                    <button id="use-my-location" class="btn-secondary">使用我的位置</button>
+                </div>
+                <div class="nearby-results" id="nearby-results">
+                    <p class="empty-state">点击"搜索"查找附近景点</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 景区图库模态框 -->
+    <div class="modal" id="scenic-gallery-modal">
+        <div class="modal-content" style="max-width:900px">
+            <div class="modal-header">
+                <h3><i class="fas fa-images"></i> 景区图库</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="gallery-search">
+                    <input type="text" id="gallery-search-input" placeholder="搜索景区名称，如：会理古城、龙肘山...">
+                    <button id="gallery-search-btn" class="btn-primary"><i class="fas fa-search"></i> 搜索</button>
+                </div>
+                <div class="gallery-tags">
+                    <button class="gallery-tag active" data-keyword="会理古城">会理古城</button>
+                    <button class="gallery-tag" data-keyword="龙肘山">龙肘山</button>
+                    <button class="gallery-tag" data-keyword="仙人湖">仙人湖</button>
+                    <button class="gallery-tag" data-keyword="金沙江">金沙江</button>
+                    <button class="gallery-tag" data-keyword="白马寺">白马寺</button>
+                    <button class="gallery-tag" data-keyword="会理会议纪念地">会理会议</button>
+                    <button class="gallery-tag" data-keyword="绿陶文化">绿陶文化</button>
+                    <button class="gallery-tag" data-keyword="鹿厂镇">鹿厂镇</button>
+                </div>
+                <div class="gallery-grid" id="gallery-grid">
+                    <p class="empty-state">点击上方标签或搜索景区名称查看图片</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 高德地图JS API - 请替换为你的Key -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=YOUR_AMAP_KEY"></script>
+
+    <script src="libs/pixi.min.js"></script>
+    <script src="libs/live2d.min.js"></script>
+    <script src="libs/live2dcubismcore.min.js"></script>
+    <script src="libs/index.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
