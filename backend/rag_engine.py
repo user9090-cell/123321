@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 会理市AI数字人导游 - RAG检索增强引擎
-作者：资深全栈架构师
 日期：2026年4月20日
 """
 
@@ -495,7 +494,8 @@ class RAGEngine:
                 "error": "API调用超时"
             }
         except Exception as e:
-            logger.error(f"小米API调用异常: {str(e)}")
+            import traceback
+            logger.error(f"小米API调用异常: {str(e)}\n{traceback.format_exc()}")
             return {
                 "success": False,
                 "error": str(e)

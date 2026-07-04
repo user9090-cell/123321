@@ -39,7 +39,7 @@ class AdminManager:
         if "guanli001" not in self.admins:
             self.admins["guanli001"] = {
                 "username": "guanli001",
-                "password": self._hash_password("123456"),
+                "password": self._hash_password("change-me-on-first-login"),
                 "created_at": datetime.now().isoformat(),
                 "last_login": None
             }

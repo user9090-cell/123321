@@ -17,8 +17,7 @@
         phone: localStorage.getItem("huili_phone") || "",
         password: localStorage.getItem("huili_password") || "",
         userLocation: null,
-        amap: null,
-        amapMarkers: [],
+        leafletMap: null,
         animationEnabled: true,
         voiceEnabled: false,
         currentUtterance: null,
@@ -466,63 +465,145 @@
         const stopVoice = $("#stop-voice");
         if (!voiceToggle) return;
 
+        let mediaRecorder = null;
+        let audioChunks = [];
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
+        const hasMediaRecorder = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+        // 如果没有 MediaRecorder 且没有 SpeechRecognition，禁用语音按钮
+        if (!hasMediaRecorder && !SpeechRecognition) {
             voiceToggle.style.opacity = "0.5";
             voiceToggle.title = "浏览器不支持语音输入";
             return;
         }
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = "zh-CN";
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        state.recognition = recognition;
+        function stopMediaRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+        }
+
+        async function startBackendRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4" });
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach((t) => t.stop());
+                    if (!audioChunks.length) return;
+
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+                    const formData = new FormData();
+                    formData.append("audio", audioBlob, "recording." + (mediaRecorder.mimeType.includes("webm") ? "webm" : "mp4"));
+                    if (state.sessionId) formData.append("session_id", state.sessionId);
+                    if (state.userLocation) {
+                        formData.append("latitude", state.userLocation.latitude);
+                        formData.append("longitude", state.userLocation.longitude);
+                    }
+
+                    updateApiStatus("API: 语音识别中...", true);
+                    try {
+                        const resp = await fetch(`${API_BASE}/api/voice`, { method: "POST", body: formData });
+                        const data = await resp.json();
+                        if (data.success && data.voice_text) {
+                            const input = $("#user-input");
+                            if (input) input.value = data.voice_text;
+                            addMessage(escapeHtml(data.voice_text), "user");
+                            if (data.reply) {
+                                addMessage(data.reply, "bot", { suggestions: data.suggestions || [] });
+                                speakText(data.reply);
+                            }
+                            updateApiStatus("API: 连接正常", true);
+                        } else {
+                            addMessage("语音识别失败: " + escapeHtml(data.error || "未知错误"), "bot");
+                            updateApiStatus("API: 识别异常", false);
+                        }
+                    } catch (err) {
+                        addMessage("语音服务异常: " + escapeHtml(err.message), "bot");
+                        updateApiStatus("API: 连接异常", false);
+                    }
+                    setVoiceStatus(false, "语音输入已关闭");
+                    state.voiceEnabled = false;
+                };
+
+                mediaRecorder.start();
+                state.voiceEnabled = true;
+                setVoiceStatus(true, "正在录音...请说话");
+            } catch (e) {
+                setVoiceStatus(false, "麦克风权限被拒绝");
+                console.error("getUserMedia error:", e);
+            }
+        }
+
+        function startBrowserRecognition() {
+            const recognition = new SpeechRecognition();
+            recognition.lang = "zh-CN";
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            state.recognition = recognition;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                const input = $("#user-input");
+                if (input) input.value = transcript;
+                sendChatMessage(transcript);
+                state.voiceEnabled = false;
+                setVoiceStatus(false, "语音输入已关闭");
+            };
+
+            recognition.onerror = () => {
+                state.voiceEnabled = false;
+                setVoiceStatus(false, "语音识别出错，请重试");
+            };
+
+            recognition.onend = () => {
+                if (state.voiceEnabled) {
+                    state.voiceEnabled = false;
+                    setVoiceStatus(false, "语音输入已关闭");
+                }
+            };
+
+            try {
+                recognition.start();
+                state.voiceEnabled = true;
+                setVoiceStatus(true, "正在聆听...请说话");
+            } catch (e) {
+                setVoiceStatus(false, "语音启动失败");
+            }
+        }
 
         voiceToggle.addEventListener("click", () => {
             if (state.voiceEnabled) {
-                recognition.stop();
+                stopMediaRecording();
+                if (state.recognition) {
+                    try { state.recognition.stop(); } catch (e) {}
+                }
                 state.voiceEnabled = false;
                 setVoiceStatus(false, "语音输入已关闭");
             } else {
-                try {
-                    recognition.start();
-                    state.voiceEnabled = true;
-                    setVoiceStatus(true, "正在聆听...请说话");
-                } catch (e) {
-                    setVoiceStatus(false, "语音启动失败");
+                if (hasMediaRecorder) {
+                    startBackendRecording();
+                } else {
+                    startBrowserRecognition();
                 }
             }
         });
 
         if (stopVoice) {
             stopVoice.addEventListener("click", () => {
-                recognition.stop();
+                stopMediaRecording();
+                if (state.recognition) {
+                    try { state.recognition.stop(); } catch (e) {}
+                }
                 state.voiceEnabled = false;
                 setVoiceStatus(false, "语音输入已关闭");
             });
         }
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            const input = $("#user-input");
-            if (input) input.value = transcript;
-            sendChatMessage(transcript);
-            state.voiceEnabled = false;
-            setVoiceStatus(false, "语音输入已关闭");
-        };
-
-        recognition.onerror = () => {
-            state.voiceEnabled = false;
-            setVoiceStatus(false, "语音识别出错，请重试");
-        };
-
-        recognition.onend = () => {
-            if (state.voiceEnabled) {
-                state.voiceEnabled = false;
-                setVoiceStatus(false, "语音输入已关闭");
-            }
-        };
     }
 
     function initNearbyAttractions() {
@@ -531,9 +612,62 @@
         const searchNearby = $("#search-nearby");
         const useMyLocation = $("#use-my-location");
         const getLocation = $("#get-location");
+        let leafletMap = null;
 
         if (nearbyBtn && nearbyModal) {
-            nearbyBtn.addEventListener("click", () => openModal(nearbyModal));
+            nearbyBtn.addEventListener("click", () => {
+                openModal(nearbyModal);
+                // 延迟初始化地图（模态框可见后容器才有尺寸）
+                setTimeout(initLeafletMap, 200);
+            });
+        }
+
+        function initLeafletMap() {
+            const mapContainer = $("#map-container");
+            if (!mapContainer || leafletMap) return;
+
+            const defaultLat = 26.6584;
+            const defaultLng = 102.2437;
+
+            leafletMap = L.map("map-container").setView([defaultLat, defaultLng], 13);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(leafletMap);
+
+            // 添加会理市默认标记
+            L.marker([defaultLat, defaultLng])
+                .addTo(leafletMap)
+                .bindPopup("<b>会理市</b><br>千年古城")
+                .openPopup();
+
+            // 存储引用以便后续使用
+            state.leafletMap = leafletMap;
+        }
+
+        function clearMapMarkers() {
+            if (!state.leafletMap) return;
+            state.leafletMap.eachLayer((layer) => {
+                if (layer instanceof L.Marker && !(layer._popup && layer._popup._content && layer._popup._content.includes("会理市"))) {
+                    state.leafletMap.removeLayer(layer);
+                }
+            });
+        }
+
+        function addMapMarkers(attractions) {
+            if (!state.leafletMap || !attractions || !attractions.length) return;
+            const bounds = [];
+            attractions.forEach((p) => {
+                if (p.latitude && p.longitude) {
+                    const marker = L.marker([p.latitude, p.longitude])
+                        .addTo(state.leafletMap)
+                        .bindPopup(`<b>${escapeHtml(p.name)}</b><br>${escapeHtml(p.description || p.address || "")}${p.distance_km ? `<br>距离: ${Number(p.distance_km).toFixed(1)} km` : ""}`);
+                    bounds.push([p.latitude, p.longitude]);
+                }
+            });
+            if (bounds.length) {
+                state.leafletMap.fitBounds(bounds, { padding: [30, 30] });
+            }
         }
 
         if (searchNearby) {
@@ -554,8 +688,17 @@
                                 <span class="distance">${p.distance_km ? Number(p.distance_km).toFixed(1) + " km" : ""}</span>
                             </div>
                         `).join("");
+                        // 在地图上显示标记
+                        if (!state.leafletMap) initLeafletMap();
+                        clearMapMarkers();
+                        addMapMarkers(result.attractions);
+                        // 更新地图中心
+                        if (state.leafletMap) {
+                            state.leafletMap.setView([lat, lng], 13);
+                        }
                     } else {
                         nearbyResults.innerHTML = '<p class="empty-state">未找到附近景点</p>';
+                        clearMapMarkers();
                     }
                 } catch (error) {
                     nearbyResults.innerHTML = `<p class="empty-state">搜索失败：${escapeHtml(error.message)}</p>`;
@@ -579,6 +722,10 @@
                         const lngInput = $("#longitude");
                         if (latInput) latInput.value = pos.coords.latitude.toFixed(4);
                         if (lngInput) lngInput.value = pos.coords.longitude.toFixed(4);
+                        // 更新地图
+                        if (state.leafletMap) {
+                            state.leafletMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
+                        }
                     },
                     (error) => {
                         alert("定位失败：" + error.message);

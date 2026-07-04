@@ -47,8 +47,8 @@ class ConfigSimple:
     MAX_AUDIO_SIZE = 10485760
     
     # 安全配置
-    SECRET_KEY = "huili-smart-guide-simple-key"
-    ADMIN_PASSWORD = "admin123"
+    SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change-me-in-production")
     
     # 文件路径配置
     LOGS_DIR = "./logs"

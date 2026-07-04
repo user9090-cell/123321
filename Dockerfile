@@ -1,6 +1,5 @@
 # 会理市AI数字人导游 - Docker镜像构建文件
 # 多阶段构建，优化镜像大小
-# 作者：资深全栈架构师
 # 日期：2026年4月20日
 
 # ========== 第一阶段：构建阶段 ==========
@@ -32,7 +31,7 @@ RUN pip install --user --no-cache-dir -r requirements.txt
 FROM python:3.9-slim
 
 # 设置元数据
-LABEL maintainer="资深全栈架构师 <architect@huili-guide.com>"
+LABEL maintainer="Huili Smart Guide Team <admin@huili-guide.com>"
 LABEL version="1.0.0"
 LABEL description="会理市AI数字人导游系统 - 国家级软件设计大赛参赛作品"
 

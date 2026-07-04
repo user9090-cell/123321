@@ -3,7 +3,6 @@
 """
 会理市AI数字人导游 - 配置管理模块
 功能：管理应用配置，从环境变量读取敏感信息
-作者：资深全栈架构师
 日期：2026年4月20日
 """
 
@@ -61,7 +60,10 @@ class Config:
     TOP_P = float(os.getenv("TOP_P", "0.9"))
     
     # 嵌入模型配置
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-zh-v1.5")
+    EMBEDDING_MODEL = os.getenv(
+        "EMBEDDING_MODEL",
+        os.path.join(PROJECT_ROOT, "models", "hub", "models--BAAI--bge-small-zh-v1.5", "snapshots", "7999e1d3359715c523056ef9478215996d62a620")
+    )
     EMBEDDING_CACHE_PATH = os.getenv(
         "EMBEDDING_CACHE_PATH",
         os.path.join(PROJECT_ROOT, "models", "hub")
@@ -84,8 +86,8 @@ class Config:
     MAX_AUDIO_SIZE = int(os.getenv("MAX_AUDIO_SIZE", "10485760"))  # 10MB
     
     # 安全配置
-    SECRET_KEY = os.getenv("SECRET_KEY", "huili-smart-guide-secret-key-2026")
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+    SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change-me-in-production")
     
     # 文件路径配置
     LOGS_DIR = os.getenv("LOGS_DIR", os.path.join(BASE_DIR, "logs"))

@@ -16,12 +16,21 @@ import hashlib
 import re
 import urllib.parse
 import mimetypes
+import tempfile
+import traceback
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
 import requests as http_requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+
+# 尝试导入语音识别库
+try:
+    import speech_recognition as sr
+    SPEECH_AVAILABLE = True
+except ImportError:
+    SPEECH_AVAILABLE = False
 
 # 导入自定义模块
 from config import Config
@@ -80,7 +89,15 @@ def get_session(session_id: str) -> Dict:
         }
     else:
         sessions[session_id]["last_active"] = datetime.now()
-    
+        # 确保登录创建的会话也包含必要字段
+        sess = sessions[session_id]
+        if "messages" not in sess:
+            sess["messages"] = []
+        if "user_location" not in sess:
+            sess["user_location"] = None
+        if "preferences" not in sess:
+            sess["preferences"] = {}
+
     return sessions[session_id]
 
 def validate_request(data: Dict, required_fields: List[str]) -> Optional[Dict]:
@@ -468,6 +485,7 @@ def api_chat():
     except Exception as e:
         error_msg = f"聊天处理异常: {str(e)}"
         logger.error(error_msg)
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
         
         # 记录错误统计
         stats_manager.record_error(
@@ -523,13 +541,50 @@ def api_voice():
         session_id = request.form.get('session_id')
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
-        
-        # 这里应该集成语音识别
-        # 由于时间关系，我们暂时返回一个模拟的文本
-        # 实际应用中应该调用语音识别API
-        
-        # 模拟语音识别结果
-        voice_text = "会理古城开放时间是多少？"
+
+        # 保存上传的音频到临时文件
+        suffix = os.path.splitext(audio_file.filename)[1] or '.wav'
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            audio_file.save(tmp.name)
+            tmp_path = tmp.name
+
+        try:
+            # 使用 speech_recognition 库进行语音识别
+            if not SPEECH_AVAILABLE:
+                return jsonify({
+                    "success": False,
+                    "error": "语音识别服务不可用，请使用文字输入"
+                }), 503
+
+            recognizer = sr.Recognizer()
+            with sr.AudioFile(tmp_path) as source:
+                audio_data = recognizer.record(source)
+
+            # 优先使用 Google 免费 API（支持中文）
+            voice_text = recognizer.recognize_google(audio_data, language='zh-CN')
+
+        except sr.UnknownValueError:
+            return jsonify({
+                "success": False,
+                "error": "语音识别失败，未能识别出文字，请重试"
+            }), 422
+        except sr.RequestError as e:
+            return jsonify({
+                "success": False,
+                "error": f"语音识别服务连接失败: {str(e)}"
+            }), 503
+        except Exception as e:
+            logger.error(f"语音识别异常: {str(e)}")
+            return jsonify({
+                "success": False,
+                "error": f"语音识别处理异常: {str(e)}"
+            }), 500
+        finally:
+            # 清理临时文件
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
         
         # 使用聊天接口处理识别后的文本
         chat_data = {
@@ -1063,7 +1118,6 @@ if __name__ == '__main__':
     print("=" * 60)
     print("会理市AI数字人导游系统 - 后端服务")
     print(f"版本: 1.0.0")
-    print(f"作者: 资深全栈架构师")
     print(f"日期: 2026年4月20日")
     print("=" * 60)
     
