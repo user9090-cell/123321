@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class AdminManager:
-    def __init__(self, data_dir: str = None):
+
+    def __init__(self, data_dir=None):
         if data_dir is None:
             data_dir = str(Path(__file__).parent / "logs")
         self.data_dir = Path(data_dir)
@@ -22,73 +23,65 @@ class AdminManager:
     def _load(self):
         if self.admin_file.exists():
             try:
-                with open(self.admin_file, "r", encoding="utf-8") as f:
-                    self.admins = json.load(f)
+                self.admins = json.loads(self.admin_file.read_text(encoding="utf-8"))
             except Exception as e:
-                logger.error(f"Failed to load admin data: {e}")
+                logger.error(f"读取管理员数据失败: {e}")
                 self.admins = {}
 
     def _save(self):
         try:
-            with open(self.admin_file, "w", encoding="utf-8") as f:
-                json.dump(self.admins, f, ensure_ascii=False, indent=2)
+            self.admin_file.write_text(json.dumps(self.admins, ensure_ascii=False, indent=2), encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to save admin data: {e}")
+            logger.error(f"保存管理员数据失败: {e}")
 
     def _ensure_default(self):
         if "guanli001" not in self.admins:
             self.admins["guanli001"] = {
                 "username": "guanli001",
-                "password": self._hash_password("change-me-on-first-login"),
+                "password": self._hash("change-me-on-first-login"),
                 "created_at": datetime.now().isoformat(),
-                "last_login": None
+                "last_login": None,
             }
             self._save()
-            logger.info("Default admin account created: guanli001")
+            logger.info("已创建默认管理员账号: guanli001")
 
     @staticmethod
-    def _hash_password(password: str) -> str:
-        return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    def _hash(pwd):
+        return hashlib.sha256(pwd.encode("utf-8")).hexdigest()
 
-    def login(self, username: str, password: str) -> Dict:
-        username = username.strip()
-        password = password.strip()
-        if not username or not password:
+    def login(self, username, password):
+        u = username.strip()
+        p = password.strip()
+        if not u or not p:
             return {"success": False, "error": "请输入账号和密码"}
-        admin = self.admins.get(username)
-        if not admin:
+        a = self.admins.get(u)
+        if not a:
             return {"success": False, "error": "账号不存在"}
-        if admin["password"] != self._hash_password(password):
+        if a["password"] != self._hash(p):
             return {"success": False, "error": "密码错误"}
-        admin["last_login"] = datetime.now().isoformat()
+        a["last_login"] = datetime.now().isoformat()
         self._save()
-        return {"success": True, "message": "登录成功", "username": username}
+        return {"success": True, "message": "登录成功", "username": u}
 
-    def change_password(self, username: str, old_password: str, new_password: str) -> Dict:
-        username = username.strip()
-        admin = self.admins.get(username)
-        if not admin:
+    def change_password(self, username, old_pwd, new_pwd):
+        u = username.strip()
+        a = self.admins.get(u)
+        if not a:
             return {"success": False, "error": "账号不存在"}
-        if admin["password"] != self._hash_password(old_password):
+        if a["password"] != self._hash(old_pwd):
             return {"success": False, "error": "原密码错误"}
-        if len(new_password.strip()) < 6:
+        if len(new_pwd.strip()) < 6:
             return {"success": False, "error": "新密码至少6位"}
-        admin["password"] = self._hash_password(new_password.strip())
+        a["password"] = self._hash(new_pwd.strip())
         self._save()
         return {"success": True, "message": "密码修改成功"}
 
-    def verify(self, username: str, password: str) -> bool:
-        admin = self.admins.get(username.strip())
-        if not admin:
-            return False
-        return admin["password"] == self._hash_password(password.strip())
+    def verify(self, username, password):
+        a = self.admins.get(username.strip())
+        return a is not None and a["password"] == self._hash(password.strip())
 
-    def get_admin(self, username: str) -> Optional[Dict]:
-        admin = self.admins.get(username.strip())
-        if not admin:
+    def get_admin(self, username):
+        a = self.admins.get(username.strip())
+        if not a:
             return None
-        return {
-            "username": admin["username"],
-            "created_at": admin.get("created_at", "--"),
-            "last_login": admin.get("last_login", "--")
-        }
+        return {"username": a["username"], "created_at": a.get("created_at", "--"), "last_login": a.get("last_login", "--")}

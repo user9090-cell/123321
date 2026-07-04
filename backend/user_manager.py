@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class UserManager:
-    def __init__(self, data_dir: str = None):
+
+    def __init__(self, data_dir=None):
         if data_dir is None:
             data_dir = str(Path(__file__).parent / "logs")
         self.data_dir = Path(data_dir)
@@ -20,30 +21,30 @@ class UserManager:
         self.avatars_dir = self.data_dir / "avatars"
         self.avatars_dir.mkdir(parents=True, exist_ok=True)
         self.users: Dict[str, dict] = {}
-        self._load_users()
+        self._load()
 
-    def _load_users(self):
+    def _load(self):
         if self.users_file.exists():
             try:
-                with open(self.users_file, "r", encoding="utf-8") as f:
-                    self.users = json.load(f)
-                logger.info(f"Loaded {len(self.users)} users")
+                self.users = json.loads(self.users_file.read_text(encoding="utf-8"))
+                logger.info(f"加载 {len(self.users)} 个用户")
             except Exception as e:
-                logger.error(f"Failed to load users: {e}")
+                logger.error(f"读取用户数据失败: {e}")
                 self.users = {}
 
-    def _save_users(self):
+    def _save(self):
         try:
-            with open(self.users_file, "w", encoding="utf-8") as f:
-                json.dump(self.users, f, ensure_ascii=False, indent=2)
+            self.users_file.write_text(json.dumps(self.users, ensure_ascii=False, indent=2), encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to save users: {e}")
+            logger.error(f"保存用户数据失败: {e}")
 
     @staticmethod
-    def _hash_password(password: str) -> str:
-        return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    def _hash(pwd):
+        return hashlib.sha256(pwd.encode("utf-8")).hexdigest()
 
-    def register(self, phone: str, password: str) -> Dict:
+    # ---- 注册 / 登录 / 注销 ----
+
+    def register(self, phone, password):
         phone = phone.strip()
         if not phone or not password:
             return {"success": False, "error": "手机号和密码不能为空"}
@@ -56,125 +57,111 @@ class UserManager:
 
         self.users[phone] = {
             "phone": phone,
-            "password": self._hash_password(password),
+            "password": self._hash(password),
             "created_at": datetime.now().isoformat(),
             "last_login": None,
-            "avatar": ""
+            "avatar": "",
         }
-        self._save_users()
-        logger.info(f"User registered: {phone}")
+        self._save()
+        logger.info(f"新用户注册: {phone}")
         return {"success": True, "message": "注册成功", "phone": phone}
 
-    def login(self, phone: str, password: str) -> Dict:
+    def login(self, phone, password):
         phone = phone.strip()
         if not phone or not password:
-            return {"success": False, "error": "手机号和密码不能为空"}
-
-        user = self.users.get(phone)
-        if not user:
+            return {"success": False, "error": "请输入手机号和密码"}
+        u = self.users.get(phone)
+        if not u:
             return {"success": False, "error": "账号不存在，请先注册"}
-        if user["password"] != self._hash_password(password):
+        if u["password"] != self._hash(password):
             return {"success": False, "error": "密码错误"}
-
-        user["last_login"] = datetime.now().isoformat()
-        self._save_users()
-        logger.info(f"User logged in: {phone}")
+        u["last_login"] = datetime.now().isoformat()
+        self._save()
+        logger.info(f"用户登录: {phone}")
         return {
-            "success": True,
-            "message": "登录成功",
-            "phone": phone,
-            "session_id": hashlib.md5(f"{phone}{time.time()}".encode()).hexdigest()[:16]
+            "success": True, "message": "登录成功", "phone": phone,
+            "session_id": hashlib.md5(f"{phone}{time.time()}".encode()).hexdigest()[:16],
         }
 
-    def logout(self, phone: str) -> Dict:
+    def logout(self, phone):
         phone = phone.strip()
-        user = self.users.get(phone)
-        if not user:
+        if phone not in self.users:
             return {"success": False, "error": "账号不存在"}
-        logger.info(f"User logged out: {phone}")
+        logger.info(f"用户登出: {phone}")
         return {"success": True, "message": "已退出登录"}
 
-    def change_password(self, phone: str, old_password: str, new_password: str) -> Dict:
+    def change_password(self, phone, old_pwd, new_pwd):
         phone = phone.strip()
-        user = self.users.get(phone)
-        if not user:
+        u = self.users.get(phone)
+        if not u:
             return {"success": False, "error": "账号不存在"}
-        if user["password"] != self._hash_password(old_password):
+        if u["password"] != self._hash(old_pwd):
             return {"success": False, "error": "原密码错误"}
-        if len(new_password) < 6:
+        if len(new_pwd) < 6:
             return {"success": False, "error": "新密码至少6位"}
-        user["password"] = self._hash_password(new_password)
-        self._save_users()
+        u["password"] = self._hash(new_pwd)
+        self._save()
         return {"success": True, "message": "密码修改成功"}
 
-    def delete_account(self, phone: str, password: str) -> Dict:
+    def delete_account(self, phone, password):
         phone = phone.strip()
-        user = self.users.get(phone)
-        if not user:
+        u = self.users.get(phone)
+        if not u:
             return {"success": False, "error": "账号不存在"}
-        if user["password"] != self._hash_password(password):
+        if u["password"] != self._hash(password):
             return {"success": False, "error": "密码错误"}
-        if user.get("avatar"):
-            old_path = self.avatars_dir / user["avatar"]
-            if old_path.exists():
+        if u.get("avatar"):
+            old = self.avatars_dir / u["avatar"]
+            if old.exists():
                 try:
-                    old_path.unlink()
+                    old.unlink()
                 except Exception:
                     pass
         del self.users[phone]
-        self._save_users()
-        logger.info(f"User deleted account: {phone}")
+        self._save()
+        logger.info(f"用户注销: {phone}")
         return {"success": True, "message": "账号已注销"}
 
-    def get_user(self, phone: str) -> Optional[Dict]:
-        user = self.users.get(phone.strip())
-        if not user:
+    # ---- 查询 ----
+
+    def get_user(self, phone):
+        u = self.users.get(phone.strip())
+        if not u:
             return None
-        return {
-            "phone": user["phone"],
-            "created_at": user.get("created_at", "--"),
-            "last_login": user.get("last_login", "--"),
-            "avatar": user.get("avatar", "")
-        }
+        return {"phone": u["phone"], "created_at": u.get("created_at", "--"), "last_login": u.get("last_login", "--"), "avatar": u.get("avatar", "")}
 
-    def get_stats(self) -> Dict:
-        total = len(self.users)
-        return {
-            "total_users": total,
-            "active_users": total
-        }
+    def get_stats(self):
+        n = len(self.users)
+        return {"total_users": n, "active_users": n}
 
-    def get_all_users(self) -> List[dict]:
-        result = []
-        for phone, user in self.users.items():
-            result.append({
-                "phone": phone,
-                "created_at": user.get("created_at", "--"),
-                "last_login": user.get("last_login", "--"),
-                "avatar": user.get("avatar", "")
-            })
-        return result
+    def get_all_users(self):
+        return [
+            {"phone": p, "created_at": u.get("created_at", "--"), "last_login": u.get("last_login", "--"), "avatar": u.get("avatar", "")}
+            for p, u in self.users.items()
+        ]
 
-    def update_avatar(self, phone: str, avatar_filename: str) -> Dict:
+    # ---- 头像 ----
+
+    def update_avatar(self, phone, fname):
         phone = phone.strip()
-        user = self.users.get(phone)
-        if not user:
+        u = self.users.get(phone)
+        if not u:
             return {"success": False, "error": "账号不存在"}
-        if user.get("avatar") and user["avatar"] != avatar_filename:
-            old_path = self.avatars_dir / user["avatar"]
-            if old_path.exists():
+        if u.get("avatar") and u["avatar"] != fname:
+            old = self.avatars_dir / u["avatar"]
+            if old.exists():
                 try:
-                    old_path.unlink()
+                    old.unlink()
                 except Exception:
                     pass
-        user["avatar"] = avatar_filename
-        self._save_users()
-        logger.info(f"Avatar updated for: {phone}")
-        return {"success": True, "message": "头像更新成功", "avatar": avatar_filename}
+        u["avatar"] = fname
+        self._save()
+        logger.info(f"头像更新: {phone}")
+        return {"success": True, "message": "头像更新成功", "avatar": fname}
 
-    def get_avatar_path(self, phone: str) -> Optional[str]:
-        user = self.users.get(phone.strip())
-        if not user or not user.get("avatar"):
+    def get_avatar_path(self, phone):
+        u = self.users.get(phone.strip())
+        if not u or not u.get("avatar"):
             return None
-        path = self.avatars_dir / user["avatar"]
-        return str(path) if path.exists() else None
+        p = self.avatars_dir / u["avatar"]
+        return str(p) if p.exists() else None

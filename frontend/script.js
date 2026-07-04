@@ -470,8 +470,8 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const hasMediaRecorder = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
-        // 如果没有 MediaRecorder 且没有 SpeechRecognition，禁用语音按钮
         if (!hasMediaRecorder && !SpeechRecognition) {
+            // 浏览器啥都不支持，别折腾了
             voiceToggle.style.opacity = "0.5";
             voiceToggle.title = "浏览器不支持语音输入";
             return;
@@ -617,8 +617,7 @@
         if (nearbyBtn && nearbyModal) {
             nearbyBtn.addEventListener("click", () => {
                 openModal(nearbyModal);
-                // 延迟初始化地图（模态框可见后容器才有尺寸）
-                setTimeout(initLeafletMap, 200);
+                setTimeout(initLeafletMap, 200); // 等 modal 显示出来再初始化地图
             });
         }
 
@@ -635,13 +634,11 @@
                 maxZoom: 19
             }).addTo(leafletMap);
 
-            // 添加会理市默认标记
             L.marker([defaultLat, defaultLng])
                 .addTo(leafletMap)
                 .bindPopup("<b>会理市</b><br>千年古城")
                 .openPopup();
 
-            // 存储引用以便后续使用
             state.leafletMap = leafletMap;
         }
 
@@ -688,11 +685,9 @@
                                 <span class="distance">${p.distance_km ? Number(p.distance_km).toFixed(1) + " km" : ""}</span>
                             </div>
                         `).join("");
-                        // 在地图上显示标记
                         if (!state.leafletMap) initLeafletMap();
                         clearMapMarkers();
                         addMapMarkers(result.attractions);
-                        // 更新地图中心
                         if (state.leafletMap) {
                             state.leafletMap.setView([lat, lng], 13);
                         }
@@ -722,7 +717,6 @@
                         const lngInput = $("#longitude");
                         if (latInput) latInput.value = pos.coords.latitude.toFixed(4);
                         if (lngInput) lngInput.value = pos.coords.longitude.toFixed(4);
-                        // 更新地图
                         if (state.leafletMap) {
                             state.leafletMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
                         }
